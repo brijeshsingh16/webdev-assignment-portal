@@ -1,0 +1,436 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Automatic Assignment Portal</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f1f5f9;
+    color: #1e293b;
+}
+
+header {
+    background: #312e81;
+    color: white;
+    padding: 24px;
+    text-align: center;
+}
+
+.container {
+    max-width: 1100px;
+    margin: auto;
+    padding: 20px;
+}
+
+.card {
+    background: white;
+    padding: 22px;
+    margin-bottom: 22px;
+    border-radius: 10px;
+    box-shadow: 0 3px 12px #00000010;
+}
+
+h2 {
+    color: #4338ca;
+}
+
+label {
+    display: block;
+    margin: 14px 0 6px;
+    font-weight: bold;
+}
+
+input[type="text"], textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font: inherit;
+}
+
+textarea {
+    min-height: 150px;
+    resize: vertical;
+    font-family: Consolas, monospace;
+    font-size: 13px;
+}
+
+.small-textarea {
+    min-height: 90px;
+}
+
+.file-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.file-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 12px;
+    border-radius: 7px;
+}
+
+input[type="file"] {
+    width: 100%;
+    margin-top: 8px;
+}
+
+button {
+    padding: 11px 16px;
+    border: none;
+    border-radius: 6px;
+    background: #4f46e5;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+button:hover {
+    background: #3730a3;
+}
+
+.secondary {
+    background: #475569;
+}
+
+.action-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+}
+
+#previewFrame {
+    width: 100%;
+    height: 400px;
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+    background: white;
+}
+
+.code-box {
+    margin-top: 18px;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.code-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    background: #e2e8f0;
+    padding: 12px;
+}
+
+.code-title h3 {
+    margin: 0;
+    font-size: 16px;
+}
+
+pre {
+    margin: 0;
+    padding: 18px;
+    background: #0f172a;
+    color: #e2e8f0;
+    overflow: auto;
+    max-height: 450px;
+    white-space: pre;
+}
+
+pre code {
+    font-family: Consolas, monospace;
+    font-size: 13px;
+}
+
+.status {
+    color: #047857;
+    font-weight: bold;
+}
+
+.hidden {
+    display: none;
+}
+
+@media (max-width: 700px) {
+    .file-row {
+        grid-template-columns: 1fr;
+    }
+
+    .container {
+        padding: 12px;
+    }
+
+    .card {
+        padding: 15px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>Web Development Assignment Portal</h1>
+    <p>Create assignments with automatic previews and source code</p>
+</header>
+
+<main class="container">
+
+    <!-- TEACHER: CREATE ASSIGNMENT -->
+    <section class="card">
+        <h2>Create a New Assignment</h2>
+        <p>Enter the assignment details and write or upload your code.</p>
+
+        <label for="title">Assignment Title</label>
+        <input type="text" id="title"
+               placeholder="Example: Student Registration Form">
+
+        <label for="description">Assignment Instructions</label>
+        <textarea id="description" class="small-textarea"
+                  placeholder="Write the task and requirements for students..."></textarea>
+
+        <div class="file-row">
+            <div class="file-box">
+                <strong>Upload HTML</strong>
+                <input type="file" id="htmlFile" accept=".html,.htm,.txt">
+            </div>
+
+            <div class="file-box">
+                <strong>Upload CSS</strong>
+                <input type="file" id="cssFile" accept=".css,.txt">
+            </div>
+
+            <div class="file-box">
+                <strong>Upload JavaScript</strong>
+                <input type="file" id="jsFile" accept=".js,.txt">
+            </div>
+        </div>
+
+        <label for="htmlInput">HTML Code</label>
+        <textarea id="htmlInput"
+                  placeholder="Write or paste your HTML here..."></textarea>
+
+        <label for="cssInput">CSS Code</label>
+        <textarea id="cssInput"
+                  placeholder="Write or paste your CSS here..."></textarea>
+
+        <label for="jsInput">JavaScript Code</label>
+        <textarea id="jsInput"
+                  placeholder="Write or paste your JavaScript here..."></textarea>
+
+        <div class="action-row">
+            <button type="button" id="generateBtn">
+                Generate Assignment
+            </button>
+
+            <button type="button" class="secondary" id="clearBtn">
+                Clear Form
+            </button>
+        </div>
+
+        <p id="status" class="status" aria-live="polite"></p>
+    </section>
+
+    <!-- STUDENT: GENERATED ASSIGNMENT -->
+    <section id="assignment" class="hidden">
+
+        <section class="card">
+            <h2 id="outputTitle"></h2>
+            <p id="outputDescription"></p>
+        </section>
+
+        <section class="card">
+            <h2>Live Output</h2>
+            <iframe id="previewFrame"
+                    title="Live assignment preview"
+                    sandbox="allow-scripts"></iframe>
+        </section>
+
+        <section class="card">
+            <h2>Source Code for Students</h2>
+            <p>Copy each section into the corresponding file in your project.</p>
+
+            <div class="code-box">
+                <div class="code-title">
+                    <h3>HTML — index.html</h3>
+                    <button type="button" data-copy="outputHTML">
+                        Copy HTML
+                    </button>
+                </div>
+                <pre><code id="outputHTML"></code></pre>
+            </div>
+
+            <div class="code-box">
+                <div class="code-title">
+                    <h3>CSS — style.css</h3>
+                    <button type="button" data-copy="outputCSS">
+                        Copy CSS
+                    </button>
+                </div>
+                <pre><code id="outputCSS"></code></pre>
+            </div>
+
+            <div class="code-box">
+                <div class="code-title">
+                    <h3>JavaScript — script.js</h3>
+                    <button type="button" data-copy="outputJS">
+                        Copy JavaScript
+                    </button>
+                </div>
+                <pre><code id="outputJS"></code></pre>
+            </div>
+        </section>
+
+    </section>
+
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+
+// Upload a file and put its text into the corresponding editor.
+function loadFile(fileInputId, editorId) {
+    $(fileInputId).addEventListener("change", async function () {
+        const file = this.files[0];
+        if (!file) return;
+
+        try {
+            $(editorId).value = await file.text();
+            $("status").textContent = file.name + " loaded successfully.";
+        } catch (error) {
+            $("status").textContent = "Could not read the selected file.";
+        }
+    });
+}
+
+loadFile("htmlFile", "htmlInput");
+loadFile("cssFile", "cssInput");
+loadFile("jsFile", "jsInput");
+
+// Generate the preview and source-code sections automatically.
+function generateAssignment() {
+    const title = $("title").value.trim();
+    const description = $("description").value.trim();
+    const html = $("htmlInput").value;
+    const css = $("cssInput").value;
+    const js = $("jsInput").value;
+
+    if (!title) {
+        alert("Please enter an assignment title.");
+        $("title").focus();
+        return;
+    }
+
+    if (!html.trim() && !css.trim() && !js.trim()) {
+        alert("Please write or upload at least one code file.");
+        return;
+    }
+
+    // Display the assignment details.
+    $("outputTitle").textContent = title;
+    $("outputDescription").textContent =
+        description || "Complete this practical assignment.";
+
+    // Automatically display all three source-code sections.
+    $("outputHTML").textContent = html;
+    $("outputCSS").textContent = css;
+    $("outputJS").textContent = js;
+
+    // Build the live preview using the supplied code.
+    // The preview runs in a sandboxed iframe.
+    const documentHTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>${css}
+</style>
+</head>
+<body>
+${html}
+<script>
+${js.replace(/<\/script/gi, "<\\/script")}
+<\/script>
+</body>
+</html>`;
+
+    $("previewFrame").srcdoc = documentHTML;
+
+    $("assignment").classList.remove("hidden");
+    $("status").textContent =
+        "Assignment generated. Preview and source code are ready.";
+
+    $("assignment").scrollIntoView({ behavior: "smooth" });
+}
+
+$("generateBtn").addEventListener("click", generateAssignment);
+
+// Copy the contents of any generated source-code section.
+document.querySelectorAll("[data-copy]").forEach(button => {
+    button.addEventListener("click", async function () {
+        const element = $(this.dataset.copy);
+        const code = element.textContent;
+        const originalLabel = this.textContent;
+
+        try {
+            await navigator.clipboard.writeText(code);
+        } catch (error) {
+            // Fallback for browsers where clipboard access is blocked.
+            const area = document.createElement("textarea");
+            area.value = code;
+            document.body.appendChild(area);
+            area.select();
+
+            const copied = document.execCommand("copy");
+            area.remove();
+
+            if (!copied) {
+                alert("Copy failed. Please select and copy the code manually.");
+                return;
+            }
+        }
+
+        this.textContent = "Copied!";
+        setTimeout(() => {
+            this.textContent = originalLabel;
+        }, 1500);
+    });
+});
+
+// Clear the assignment editor.
+$("clearBtn").addEventListener("click", function () {
+    if (!confirm("Clear all assignment details and code?")) return;
+
+    $("title").value = "";
+    $("description").value = "";
+    $("htmlInput").value = "";
+    $("cssInput").value = "";
+    $("jsInput").value = "";
+
+    $("htmlFile").value = "";
+    $("cssFile").value = "";
+    $("jsFile").value = "";
+
+    $("assignment").classList.add("hidden");
+    $("previewFrame").srcdoc = "";
+    $("status").textContent = "";
+});
+</script>
+
+</body>
+</html>
